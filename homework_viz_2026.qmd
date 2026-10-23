@@ -80,11 +80,16 @@ ggplot(hogwarts, aes(x = factor(course))) +
 
 ```{r task-2}
 ggplot(hogwarts, aes(x = house, fill = bloodStatus)) +
-  geom_bar(position = "fill", color = "black", linewidth = 0.3) +
+  geom_bar(
+    aes(y = after_stat(count / sum(count))),
+    position = "stack",
+    color = "black",
+    linewidth = 0.3
+  ) +
   labs(
     title = "Происхождение студентов\nна разных факультетах",
     x = "Факультет",
-    y = "Доля студентов",
+    y = "Доля всех студентов",
     fill = "Происхождение"
   ) +
   scale_y_continuous(
@@ -103,7 +108,7 @@ ggplot(hogwarts, aes(x = house, fill = bloodStatus)) +
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
   )
 ```
-
+Меньше всего Слизеринцев, больше всего Хафлпаф, хотя большой разницы между ним, Гриффиндором и Когтевраном нет. Среди слизеринцев нет маглорожденных и больше всех чистокровок. В гриффиндоре больше, чем среди остальных, маглорожденных и меньше чистокровных.
 **Вывод:** …
 
 # Задание 3
