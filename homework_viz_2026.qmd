@@ -127,16 +127,18 @@ ggplot(
     alpha = 0.5,
     color = "grey30"
   ) +
-  geom_boxplot(
-    width = 0.15,
-    outlier.shape = NA,
-    alpha = 0.8
-  ) +
   geom_jitter(
     width = 0.06,
     height = 0,
-    alpha = 0.25,
-    size = 1.5
+    alpha = 0.12,
+    size = 0.7
+  ) +
+  geom_boxplot(
+    width = 0.18,
+    outlier.shape = NA,
+    fill = "white",
+    color = "black",
+    alpha = 0.7
   ) +
   scale_fill_manual(
     values = c(
@@ -178,12 +180,34 @@ ggplot(
 ```
 
 **Интерпретация:** …
-Чаще всего студентам добовляют, или им снимают, небольшие баллы (от )
+Чаще всего студентам добовляют, или им снимают, небольшие баллы (от -5 до 5). Однако Грифиндору часто дают до 10 баллов, а Пуффендую и Слизерину реже дают высокие баллы (15-25). Однако Пуффендую, в отличие от Слизерина чаще дают средние баллы (5-15). Медиана у всех факультетов более-менее одинаковая.
+
 # Задание 4
 
 Постройте гистограмму результатов любого экзамена на ваш выбор, кроме зельеварения. Настройте оптимальное, на ваш взгляд, число столбцов гистограммы. Выполните фасетирование по курсу. Постарайтесь, чтобы график был по возможности компактным. Проинтерпретируйте график.
 
 ```{r task-4}
+
+# Задание 4. Распределение результатов экзамена по прорицаниям
+ggplot(hogwarts, aes(x = `Divinations exam`)) +
+  geom_histogram(
+    bins = 12,
+    fill = "#7B68A6",
+    color = "white",
+    linewidth = 0.4
+  ) +
+  facet_wrap(~ course, ncol = 3) +
+  labs(
+    title = "Результаты экзамена по прорицаниям",
+    x = "Баллы за экзамен",
+    y = "Количество студентов"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+    strip.text = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
 
 ```
 
@@ -196,10 +220,90 @@ ggplot(
 Раскрасьте точки в разные цвета в соответствии с факультетами. Проинтерпретируйте полученный результат.
 
 ```{r task-5}
+hogwarts |>
+  ggplot(aes(x = `Divinations exam`, y = house, fill = house)) +
+  geom_jitter(
+    width = 0, height = 0.25,
+    shape = 21, size = 1.5, alpha = 0.3
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    shape = 24,
+    size = 2,
+    fill = "white",
+    colour = "black"
+  ) +
+  facet_wrap(~ course, ncol = 3) +
+    scale_fill_manual(
+    values = c(
+      "Gryffindor" = "#B32025",
+      "Hufflepuff" = "#D7A900",
+      "Ravenclaw" = "#2E5EAA",
+      "Slytherin" = "#2F7D4A"
+      ),
+      guide = "none"
+    ) +
+  labs(
+    title = "Результаты экзамена \nпо прорицаниям по курсам",
+    x = "Прорицания, баллы",
+    y = "Факультет"
+  ) +
+  theme_minimal(
+    base_size = 16,
+    ink = "#EDE6DA",
+    paper = "#2B2724"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12),
+    strip.text = element_text(face = "bold")
+  )
 
+hogwarts |>
+  ggplot(aes(x = `Divinations exam`, y = house, fill = house)) +
+  geom_jitter(
+    width = 0, height = 0.25,
+    shape = 21, size = 2.5, alpha = 0.3
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    shape = 24,
+    size = 5,
+    fill = "white",
+    colour = "black"
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Gryffindor" = "#B32025",
+      "Hufflepuff" = "#D7A900",
+      "Ravenclaw" = "#2E5EAA",
+      "Slytherin" = "#2F7D4A"
+    ),
+    guide = "none"
+  ) +
+  labs(
+    title = "Результаты экзамена по прорицаниям \nна всех курсах",
+    x = "Прорицания, баллы",
+    y = "Факультет",
+    caption = "▲ - средний балл"
+  ) +
+  theme_minimal(
+    base_size = 16,
+    ink = "#EDE6DA",
+    paper = "#2B2724"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
+    plot.subtitle = element_text(hjust = 0.5),
+    panel.grid.minor = element_blank()
+  )
 ```
 
 **Интерпретация:** …
+Лучше всего экзамен по прорицаниям сдает слизерин, однако на 4 курсе в слизерине средних баллов нет - есть только очень высокие и очень низкие баллы. Обычно остальные факультеты сдают экзамен одинаково, однако на 3 курсе Пуфендуй сдали хуже всех. У слизерина самый большой разброс оценок. Меньше всего разброс у Когтеврана и Гриффиндора.
 
 # Задание 6
 
