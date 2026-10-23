@@ -187,13 +187,11 @@ ggplot(
 Постройте гистограмму результатов любого экзамена на ваш выбор, кроме зельеварения. Настройте оптимальное, на ваш взгляд, число столбцов гистограммы. Выполните фасетирование по курсу. Постарайтесь, чтобы график был по возможности компактным. Проинтерпретируйте график.
 
 ```{r task-4}
-
-# Задание 4. Распределение результатов экзамена по прорицаниям
 ggplot(hogwarts, aes(x = `Divinations exam`)) +
   geom_histogram(
-    bins = 12,
+    bins = 14,
     fill = "#7B68A6",
-    color = "white",
+    color = "black",
     linewidth = 0.4
   ) +
   facet_wrap(~ course, ncol = 3) +
@@ -209,9 +207,40 @@ ggplot(hogwarts, aes(x = `Divinations exam`)) +
     panel.grid.minor = element_blank()
   )
 
+ggplot(hogwarts, aes(x = `Divinations exam`, fill = house)) +
+  geom_histogram(
+    bins = 14,
+    color = "black",
+    linewidth = 0.3,
+    alpha = 0.8,
+    position = "identity"
+  ) +
+  facet_wrap(~ course, ncol = 3) +
+  scale_fill_manual(
+    values = c(
+      "Gryffindor" = "#B32025",
+      "Hufflepuff" = "#D7A900",
+      "Ravenclaw" = "#2E5EAA",
+      "Slytherin" = "#2F7D4A"
+    ),
+    name = "Факультет"
+  ) +
+  labs(
+    title = "Распределение результатов экзамена по прорицаниям",
+    x = "Баллы за экзамен",
+    y = "Количество студентов"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    strip.text = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
+  )
 ```
 
 **Интерпретация:** …
+Очень мало студентов получают высокий балл за экзамен по прорицанием. Тяжело сказать какой курс справляется лучше. Попробовал добавить разделение по факультетам, но график получился плохочитаемым. Но видно что Слизерин справляется лучше всех. А на 4 курсе у Слизерина нет средних баллов - только низкие и высокие. Думал добавить еще среднее значение, но как будто тут это бесполезно и все усложнится.
 
 # Задание 5
 
@@ -220,90 +249,83 @@ ggplot(hogwarts, aes(x = `Divinations exam`)) +
 Раскрасьте точки в разные цвета в соответствии с факультетами. Проинтерпретируйте полученный результат.
 
 ```{r task-5}
-hogwarts |>
-  ggplot(aes(x = `Divinations exam`, y = house, fill = house)) +
-  geom_jitter(
-    width = 0, height = 0.25,
-    shape = 21, size = 1.5, alpha = 0.3
-  ) +
-  stat_summary(
-    fun = mean,
-    geom = "point",
-    shape = 24,
-    size = 2,
-    fill = "white",
-    colour = "black"
-  ) +
-  facet_wrap(~ course, ncol = 3) +
-    scale_fill_manual(
-    values = c(
-      "Gryffindor" = "#B32025",
-      "Hufflepuff" = "#D7A900",
-      "Ravenclaw" = "#2E5EAA",
-      "Slytherin" = "#2F7D4A"
-      ),
-      guide = "none"
-    ) +
-  labs(
-    title = "Результаты экзамена \nпо прорицаниям по курсам",
-    x = "Прорицания, баллы",
-    y = "Факультет"
-  ) +
-  theme_minimal(
-    base_size = 16,
-    ink = "#EDE6DA",
-    paper = "#2B2724"
-  ) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
-    axis.text.x = element_text(size = 10),
-    axis.title.x = element_text(size = 12),
-    strip.text = element_text(face = "bold")
+hogwarts <- hogwarts |>
+  mutate(
+    total_score = rowSums(
+      across(ends_with("exam")),
+      na.rm = TRUE
+    )
+  )
+exams <- c(
+  "Herbology exam",
+  "Muggle studies exam",
+  "Arithmancy exam",
+  "Potions exam"
+)
+
+long_exams <- hogwarts |>
+  select(id, house, total_score, all_of(exams)) |>
+  pivot_longer(
+    cols = all_of(exams),
+    names_to = "exam",
+    values_to = "score"
   )
 
-hogwarts |>
-  ggplot(aes(x = `Divinations exam`, y = house, fill = house)) +
-  geom_jitter(
-    width = 0, height = 0.25,
-    shape = 21, size = 2.5, alpha = 0.3
+long_exams |>
+  ggplot(
+    aes(
+      x = total_score,
+      y = score,
+      colour = house
+    )
   ) +
-  stat_summary(
-    fun = mean,
-    geom = "point",
-    shape = 24,
-    size = 5,
-    fill = "white",
-    colour = "black"
+  geom_point(alpha = 0.4, size = 2) +
+  geom_smooth(
+    aes(group = 1),
+    method = "loess",
+    span = 0.9,
+    se = FALSE,
+    colour = "black",
+    linewidth = 1
   ) +
-  scale_fill_manual(
+  facet_wrap(
+    ~ exam,
+    ncol = 2,
+    labeller = as_labeller(c(
+      "Herbology exam" = "Травология",
+      "Muggle studies exam" = "Магловедение",
+      "Arithmancy exam" = "Нумерология",
+      "Potions exam" = "Зельеварение"
+    ))
+  ) +
+  scale_colour_manual(
     values = c(
       "Gryffindor" = "#B32025",
       "Hufflepuff" = "#D7A900",
       "Ravenclaw" = "#2E5EAA",
       "Slytherin" = "#2F7D4A"
     ),
-    guide = "none"
+    name = "Факультет"
   ) +
   labs(
-    title = "Результаты экзамена по прорицаниям \nна всех курсах",
-    x = "Прорицания, баллы",
-    y = "Факультет",
-    caption = "▲ - средний балл"
+    title = "Связь суммарного балла с результатами экзаменов",
+    x = "Суммарный балл за год",
+    y = "Баллы за экзамен"
   ) +
-  theme_minimal(
-    base_size = 16,
-    ink = "#EDE6DA",
-    paper = "#2B2724"
-  ) +
+  theme_minimal(base_size = 14) +
   theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 15),
-    plot.subtitle = element_text(hjust = 0.5),
-    panel.grid.minor = element_blank()
+    plot.title = element_text(
+      face = "bold",
+      hjust = 0.5
+    ),
+    strip.text = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
   )
 ```
 
-**Интерпретация:** …
-Лучше всего экзамен по прорицаниям сдает слизерин, однако на 4 курсе в слизерине средних баллов нет - есть только очень высокие и очень низкие баллы. Обычно остальные факультеты сдают экзамен одинаково, однако на 3 курсе Пуфендуй сдали хуже всех. У слизерина самый большой разброс оценок. Меньше всего разброс у Когтеврана и Гриффиндора.
+**Интерпретация:** 
+Как и ожидалось, студенты сдающие хорошо экзамен, имеют и высокий балл за год (особенно это видно по Нумерологии и Магловедению). На травологии студенты сдают экзамен лучше всего, даже те у кого суммарный балл невысовкий - возможно экзамен легкий, или предмет дается просто. На зельеварении слизерин получает заметно выше балл, даже те, у кого низкий балл за год. Можно предположить, что либо Слизерин лучше знает этот предмет, чем остальные факультеты, либо преподаватель предзято оценивает. Интересно, что графики согласуются, если строить такой же график по result - вкладу ученика в общий балл факультета (?)
 
 # Задание 6
 
