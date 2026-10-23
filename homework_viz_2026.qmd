@@ -79,7 +79,28 @@ ggplot(hogwarts, aes(x = factor(course))) +
 С помощью аргумента `position` измените график так, чтобы каждый столбец показывал распределение факультета по чистоте крови в долях. Запишите текстом в этом файле, какой вывод можно сделать из графика.
 
 ```{r task-2}
-
+ggplot(hogwarts, aes(x = house, fill = bloodStatus)) +
+  geom_bar(position = "fill", color = "black", linewidth = 0.3) +
+  labs(
+    title = "Происхождение студентов\nна разных факультетах",
+    x = "Факультет",
+    y = "Доля студентов",
+    fill = "Происхождение"
+  ) +
+  scale_y_continuous(
+    labels = scales::label_percent()
+  ) +
+  scale_fill_manual(
+    values = c(
+      "pure-blood" = "#E26D27",
+      "half-blood" = "#F2B82E",
+      "muggle-born" = "#4A2E2B"
+    )
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+  )
 ```
 
 **Вывод:** …
